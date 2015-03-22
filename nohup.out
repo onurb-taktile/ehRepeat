@@ -1,0 +1,2 @@
+
+(gtranslator:8054): GLib-GObject-CRITICAL **: g_object_unref: assertion `G_IS_OBJECT (object)' failed

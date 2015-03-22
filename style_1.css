@@ -1,0 +1,203 @@
+#event-area-title, #event-area-content  {
+	display:none;
+}
+
+.left {
+	display: inline-block;
+	padding-right: 10px;
+}
+
+.sep {
+	display:inline-block;
+	border-left:1px solid #ccc;
+	width:1px;
+	margin:7px;
+	height:90%;
+}
+
+input[type=text].error{
+	border:1px outset #f00;
+	background-color:#F7DFE6;
+}
+
+#ehrepeat-editor-title{
+	
+}
+
+.onelinedp{
+	padding-top:1px;
+}
+
+.onelinedp span{
+	display:inline;
+	padding:0 2px 0 2px;
+}
+
+.datepicker{
+	width:100% !important;
+}
+
+.datepicker input{
+	max-width:140px;
+}
+
+.datepicker>label>* {
+	clear:both;
+	display:block;
+	margin-left:1em;
+}
+
+#rpt-slaves-dates-wip {
+	background-color:#C0C0C0;
+	display:none;
+}
+#rpt-slaves-dates-wip h1{
+}
+
+#enddt-duration-d,  #enddt-duration-h, #enddt-duration-m{
+	clear:none;
+}
+
+/*repeat editor stuff*/
+/*main rpt-freq-editor div*/
+#rpt-freq-editor button{
+	font-size: 10pt;
+	font-weight: bold;
+}
+
+#rpt-freq-editor button:disabled {
+    background-color: darkgrey;
+    color: darkblue;
+    background-image: none;
+}
+
+/*Collapsible help divs*/
+
+.rpt-editor-help {
+	background-color: #F7DFE6;
+	font-style:italic;
+	margin: 7px -8px -6px -8px;
+	border-top: 0.5px dotted #C0C0C0;
+}
+
+.rpt-editor-help-button a {
+font-size: 14pt;
+font-weight: bold;
+text-decoration: none;
+border:none;
+margin: -9px 0;
+display:block;
+}
+.rpt-editor-help-button a:link, .rpt-editor-help-button a:visited, .rpt-editor-help-button a:focus{
+	border:none; outline:none;
+}
+
+.rpt-editor-help-button a:hover{
+	background: transparent;
+	color:#F7DFE6;	
+}
+
+.rpt-editor-help-button:hover {
+	background-color:#333333;
+	cursor: help;
+}
+
+.rpt-editor-help-button {
+   	padding: 2px;
+	text-align: left;
+	vertical-align: top;
+	height: 17px;
+	width:17px;
+	margin: 0;
+	border-bottom-right-radius:5px;
+}
+
+.rpt-editor-help-content {
+margin: -17px 0px 0px 37px;
+padding: 7px 11px 3px;
+}
+
+/*Rule editor div = toolbox*/
+
+#rpt-rules-editor {
+	clear:both;
+	display:block;
+	margin-bottom:29px;
+}
+
+#rpt-rules-editor>:not(button){
+	float:left;
+}
+
+#rpt-rules-editor>button{
+	float:right;
+}
+
+#rpt-rules-editor>div>span{
+	margin: 0 3px 0 3px;
+	padding-top:4px;
+}
+
+#xered-mode {
+	margin-right:7px;
+}
+
+#rpt-rules-editor>span,#rpt-rules-editor>button{
+	font-size:11pt;
+	font-weight: bolder;
+	padding: 0 3px 0 3px;
+}
+
+#xered-action:disabled {
+    background-color: #A9A9A9;
+}
+
+/*Rule lines*/
+
+.rpt-rule-line>button {
+	float:right;
+}
+.rpt-rule-line>span {
+	width:75%;
+	text-align:center;		
+}
+
+#rpt-display {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.rpt-display-line{
+	clear:both;
+	display:flex;
+	height:25px;
+	margin:0;
+}
+.rpt-display-line-odd{
+	background-color: #ccffcc;
+}
+
+.rpt-display-line-even{
+	background-color:#ffffcc;
+}
+
+.rpt-display-line>button{
+	float:right;
+}
+.rpt-display-line>input{
+	display:none;
+	float:left;
+}
+.rpt-display-line>span{
+	float:left;
+	flex:90%;
+}
+
+.rpt-display-template {
+	display:none;
+}
+
+.rpt-display-debug {
+	display:block;
+	border:1px dashed red;
+}
