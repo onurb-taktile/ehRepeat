@@ -120,9 +120,16 @@ class xFrequency{
 		$res=($N && !$O);
 		return $res;
 	}
-	
-	public function computeDates($startdt,$enddt)
+		
+	public function computeDates($startdt,$duration,$exc)
 	{
+		$now = time();
+		if ($startdt < $now)
+			$startdt = $now;
+		$range = ($duration ? $duration : 183) * 24 * 3600;
+		$enddt = $startdt + $range;
+		array_walk($exc,function(&$v,$i){$v=strtotime($v);});
+
 		$a_startdt=getdate($startdt);
 		$a_enddt=getdate($enddt);
 		/* we build $months & $days from $startdt & $enddt according to the months & days present in $this elems.*/ 
@@ -138,7 +145,9 @@ class xFrequency{
 						if($this->isDayOk($d, $M, $y)){
 							foreach($this->hours as $h)
 								foreach ($this->minutes as $m) {
-									$dates[]=date("Y-m-d H:i",mktime($h,$m,0,$M,$d,$y));
+									$date=mktime($h,$m,0,$M,$d,$y);
+									if(!in_array($date,$exc))
+										$dates[]=$date;
 								}							
 						}
 					}

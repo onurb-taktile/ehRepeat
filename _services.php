@@ -33,23 +33,17 @@ class ehRepeatRestMethods
 		$freq = isset($get['freq'])?$get['freq']:null;
 		$startdt = isset($get['startdt'])?$get['startdt']:null;
 		$enddt = isset($get['enddt'])?$get['enddt']:null;
-
+		$exc = isset($get['exc'])?explode((';'), $get['exc']):array();
 		$rsp = new xmlTag();
 		if ($freq == null || $startdt == null)
 			throw new Exception("Wrong parameters",1);
 				
 		$t_startdt = strtotime($startdt);
-		$now=time();
-		if ($t_startdt < $now)
-			$t_startdt = $now;
-		if(!$enddt){
-			$t_duration = ($core->blog->settings->eventHandler->rpt_duration ? $core->blog->settings->eventHandler->rpt_duration : 183) * 24 * 3600;
-			$t_enddt = $t_startdt+$t_duration;
-		}else{
-			$t_enddt = strtotime($enddt);		
-		}
+		$t_duration = $core->blog->settings->eventHandler->rpt_duration;
+		$t_enddt = $enddt? strtotime($enddt):strtotime($t_startdt+($t_duration*24*3600));
+		$xfreq=new xFrequency($freq);
+		$slave_dates=  $xfreq->computeDates($t_startdt, $t_duration, $exc);
 		
-		$xfreq = new xFrequency($freq);
 		$rsp->insertNode($xfreq->toXml());
 		$dates = new xmlTag("dates");
 
@@ -57,28 +51,11 @@ class ehRepeatRestMethods
 		$dates->from = strftime("%c",$t_startdt);
 		$dates->to = strftime("%c",$t_enddt);
 		$dates->freq = $freq;
-		$res = $xfreq->computeDates($t_startdt,$t_enddt);
-		foreach ($res as $r) {
-			$rr = strftime(__("%A %B %e %Y %k:%M"),strtotime($r));
+		foreach ($slave_dates as $r) {
+			$rr = strftime(__("%A %B %e %Y %k:%M"),$r);
 			$dates->insertNode(new xmlTag("date",$rr));
 		}
 		$rsp->insertNode($dates);
 		return $rsp;
 	}
-
-	public static function countSlaves($core,$get)
-	{
-		$master_id = $get["master_id"];
-		if ($master_id == null)
-			throw new Exception("Need master_id to count slaves",1);
-		$rpt = new ehRepeat(new eventHandler($core));
-		$res = $rpt->getEvents(array('slaves'=>$master_id),true);
-		$rsp = new xmlTag();
-		if ($res->f(0) > 0)
-			$rsp->value(sprintf(__(" - one event has been generated."," - %d events have been generated",(integer)$res->f(0)),$res->f(0)));
-		else
-			$rsp->value("");
-		return $rsp;
-	}
-	
 }

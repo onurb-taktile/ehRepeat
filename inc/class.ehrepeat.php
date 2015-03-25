@@ -20,6 +20,8 @@ class ehRepeat extends eventHandler {
 		$this->type = $e->type;
 		$this->table = $e->table;
 		$this->blog = $e->blog;
+		$this->settings = $this->core->blog->settings->eventHandler;
+		$this->eventHandler = $e;
 	}
 
 	protected function cloneEvent($event_id, $changes = null) {
@@ -68,29 +70,62 @@ class ehRepeat extends eventHandler {
 	}
 
 	public function getMaster($master_id) {
-		return this::getEvents(array('master' => $master_id));
+		return $this::getEvents(array('master' => $master_id));
 	}
 
 	public function getSlaves($master_id) {
-		return this::getEvents(array('slaves' => $master_id));
+		return $this::getEvents(array('slaves' => $master_id));
 	}
 
-	public function generateSlaves($master_id) {
+	public function generateSlaves($master_id,&$masterdtchanged) {
+		if ($master_id === null)
+			return;
 		$date = getdate();
 		$master = $this->getMaster($master_id);
 		if (!$master->count() > 0)
 			return -1;
-		$xfreq = new xFrequency($master->getFreq());
-		$slaves_startdt = strtotime($master->event_startdt);
-		$now = time();
-		if ($slaves_startdt < $now)
-			$slaves_startdt = $now;
-		$slaves_range = ($core->blog->settings->eventHandler->rpt_duration ? $core->blog->settings->eventHandler->rpt_duration : 183) * 24 * 3600;
-		$slaves_enddt = $slaves_startdt + $slaves_range;
-		$slaveDates = $xfreq->computeDates($slaves_startdt, $slaves_enddt);
+		$t_slaves_startdt = strtotime($master->event_startdt);
 
+		$xfreq = new xFrequency($master->getFreq());
+		$slaveDates = $xfreq->computeDates($t_slaves_startdt, $this->settings->rpt_duration, $master->getExc());
 		//first, we delete all existing slaves
 		$this->deleteSlaves($master_id);
+		//if $master is old, set its start_dt to the next slave date
+
+		if ($master->getPeriod() == 'finished') {
+			$t_new_startdt = array_shift($slaveDates);
+			if ($t_new_startdt) {
+				//first we clean exc, removing past dates
+				$exc=explode(';',$master->rpt_exc);
+				$newexc=array();
+				foreach($exc as $i=>$e){
+					if(strtotime($e)>=time()){
+						$newexc[]=$e;
+					}
+				}
+				
+				$this->con->begin();
+				try {
+					$t_duration=strtotime($master->event_enddt) - strtotime($master->event_startdt);
+					$cur_post = $this->core->con->openCursor($this->core->prefix . 'post');
+					$cur_post->post_dt = date('Y-m-d H:i:00', $t_new_startdt);
+					$cur_post->update("WHERE post_id = '" . $master->post_id . "' ");
+				
+					
+					$cur_event = $this->core->con->openCursor($this->core->prefix . 'eventhandler');
+					$cur_event->event_startdt = date('Y-m-d H:i:00', $t_new_startdt);
+					$cur_event->event_enddt= date('Y-m-d H:i:00', $t_new_startdt+$t_duration);
+					$cur_event->rpt_exc=implode(';',$newexc);
+					$cur_event->update("WHERE post_id = '" . $master->post_id . "' ");
+				} catch (Exception $e) {
+					$this->con->rollback();
+					throw $e;
+				}
+				$this->con->commit();
+				$masterdtchanged=true;
+			}
+		}
+
 		$slaves = array();
 		try {
 			foreach ($slaveDates as $slave_startdt) {
@@ -119,17 +154,16 @@ class ehRepeat extends eventHandler {
 		}
 	}
 
-	protected function createSlaveEvent($master_id,$slave_startdt)
-	{
+	protected function createSlaveEvent($master_id, $t_slave_startdt) {
 		//get the master Event
 		$master = $this->getMaster($master_id);
 
-		$master_duration = strtotime($master->event_enddt) - strtotime($master->event_startdt);
+		$t_master_duration = strtotime($master->event_enddt) - strtotime($master->event_startdt);
 
-		$slave_id = $this->cloneEvent($master_id,array(
-			'cur_post->post_dt' => date('Y-m-d H:i:00',strtotime($slave_startdt)),
-			'cur_event->event_startdt' => date('Y-m-d H:i:00',strtotime($slave_startdt)),
-			'cur_event->event_enddt' => date('Y-m-d H:i:00',strtotime($slave_startdt) + $master_duration),
+		$slave_id = $this->cloneEvent($master_id, array(
+			'cur_post->post_dt' => date('Y-m-d H:i:00', $t_slave_startdt),
+			'cur_event->event_startdt' => date('Y-m-d H:i:00', $t_slave_startdt),
+			'cur_event->event_enddt' => date('Y-m-d H:i:00', $t_slave_startdt + $t_master_duration),
 			'cur_event->rpt_master' => $master_id,
 			'cur_event->rpt_freq' => $master->rpt_freq,
 			'cur_event->rpt_exc' => $master->rpt_exc
@@ -138,4 +172,31 @@ class ehRepeat extends eventHandler {
 		return $slave_id;
 	}
 
+	public function freeSlaveEvent($slave_id) {
+		global $core;
+		$slave = $this::getEvents(array('post_id' => $slave_id));
+		if($slave->count()==0 || !$slave->isSlave())
+			return false;
+		$this->con->begin();
+		try {
+			//first, get master and add an exception rule for slave startdt
+			$master = $this::getEvents(array('master' => $slave->rpt_master));
+			$cur_event = $core->con->openCursor($core->prefix . 'eventhandler');
+			$cur_event->rpt_exc = $master->rpt_exc . ';' . date('Y-m-d H:i', strtotime($slave->event_startdt));
+			$cur_event->update("WHERE post_id = '" . $master->post_id . "' ");
+
+			//then, set the slave free
+			$cur_event = $core->con->openCursor($core->prefix . 'eventhandler');
+			$cur_event->rpt_master = null;
+			$cur_event->rpt_freq = null;
+			$cur_event->rpt_exc = null;
+
+			$cur_event->update("WHERE post_id = '" . $slave_id . "' ");
+		} catch (Exception $e) {
+			$this->con->rollback();
+			throw $e;
+		}
+		$this->con->commit();
+		return true;
+	}
 }

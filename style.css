@@ -21,7 +21,7 @@ input[type=text].error{
 }
 
 #ehrepeat-editor-title{
-	
+
 }
 
 .onelinedp{
@@ -45,6 +45,12 @@ input[type=text].error{
 	clear:both;
 	display:block;
 	margin-left:1em;
+}
+
+
+#rpt-slaves-dates {
+	overflow-y: scroll;
+	max-height: 150px;
 }
 
 #rpt-slaves-dates-wip {
@@ -81,12 +87,12 @@ input[type=text].error{
 }
 
 .rpt-editor-help-button a {
-font-size: 14pt;
-font-weight: bold;
-text-decoration: none;
-border:none;
-margin: -9px 0;
-display:block;
+	font-size: 14pt;
+	font-weight: bold;
+	text-decoration: none;
+	border:none;
+	margin: -9px 0;
+	display:block;
 }
 .rpt-editor-help-button a:link, .rpt-editor-help-button a:visited, .rpt-editor-help-button a:focus{
 	border:none; outline:none;
@@ -113,8 +119,8 @@ display:block;
 }
 
 .rpt-editor-help-content {
-margin: -17px 0px 0px 37px;
-padding: 7px 11px 3px;
+	margin: -17px 0px 0px 37px;
+	padding: 7px 11px 3px;
 }
 
 /*Rule editor div = toolbox*/
@@ -170,7 +176,6 @@ padding: 7px 11px 3px;
 .rpt-display-line{
 	clear:both;
 	display:flex;
-	height:25px;
 	margin:0;
 }
 .rpt-display-line-odd{
@@ -185,7 +190,7 @@ padding: 7px 11px 3px;
 	float:right;
 }
 .rpt-display-line>input{
-	display:none;
+	/*display:none;*/
 	float:left;
 }
 .rpt-display-line>span{

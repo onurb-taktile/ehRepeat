@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 2015-03-08\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-22 22:13+0100\n"
-"PO-Revision-Date: 2015-03-22 22:18+0100\n"
-"Last-Translator: onurb teva <dev@taktile.fr>\n"
+"POT-Creation-Date: 2015-03-23 20:07+0100\n"
+"PO-Revision-Date: 2015-03-23 22:42+0100\n"
+"Last-Translator: Onurb <bruno@taktile.fr>\n"
 "Language-Team: français <>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -41,40 +41,41 @@ msgstr "Un an"
 msgid "Custom"
 msgstr "Personnalisé"
 
-#: ../../_admin.php:71
+#: ../../_admin.php:72
 msgid "minute"
 msgstr "minute"
 
-#: ../../_admin.php:72
+#: ../../_admin.php:73
 msgid "5 minutes"
 msgstr "5 minutes"
 
-#: ../../_admin.php:73
+#: ../../_admin.php:74
 msgid "quarter hour"
 msgstr "quart d'heure"
 
-#: ../../_admin.php:74
+#: ../../_admin.php:75
 msgid "half hour"
 msgstr "demi-heure"
 
-#: ../../_admin.php:75
+#: ../../_admin.php:76
 msgid "hour"
 msgstr "heure"
 
-#: ../../_admin.php:98
+#: ../../_admin.php:99
 #, php-format
 msgid "Defaulting to 183, «%s» is not a correct value."
 msgstr "Durée à 183, «%s» n'est pas une valeur correcte."
 
-#: ../../_admin.php:116
+#: ../../_admin.php:117
 msgid "Display:"
 msgstr "Afficher:"
 
-#: ../../_admin.php:136 ../../tpl/event_editor.tpl:27
+#: ../../_admin.php:137
+#: ../../tpl/event_editor.tpl:27
 msgid "All"
 msgstr "Tous"
 
-#: ../../_admin.php:136
+#: ../../_admin.php:137
 msgid "Master and regular"
 msgstr "Maître et non répétitif"
 
@@ -82,27 +83,44 @@ msgstr "Maître et non répétitif"
 msgid "Rep."
 msgstr "Rep."
 
-#: ../../_admin.php:280
+#: ../../_admin.php:282
 msgid "N/A"
 msgstr "N/A"
 
-#: ../../_admin.php:292
+#: ../../_admin.php:294
 msgid "Repeat events"
 msgstr "Événements répétitifs"
 
-#: ../../_admin.php:293
+#: ../../_admin.php:295
 msgid "Regenerate all events from today"
 msgstr "Régénérer tous les événements à partir d'aujourd'hui"
 
-#: ../../_admin.php:294
+#: ../../_admin.php:296
 msgid "Make unique"
 msgstr "Rendre unique"
 
+#: ../../_admin.php:338
+msgid "Choose day"
+msgstr "Choisissez un jour"
+
 #: ../../_admin.php:343
+msgid "Choose month"
+msgstr "Choisissez un mois"
+
+#: ../../_admin.php:350
+#: ../../js/event.js:34
+#: ../../js/event.js:78
+#: ../../js/eventeditor.js:21
+msgid "day"
+msgid_plural "days"
+msgstr[0] "jour"
+msgstr[1] "jours"
+
+#: ../../_admin.php:382
 msgid "You have to provide a frequency for a recurrent event."
 msgstr "Vous devez fournir une fréquence pour un événement récurrent"
 
-#: ../../_admin.php:398
+#: ../../_admin.php:437
 msgid " "
 msgid_plural " "
 msgstr[0] " "
@@ -110,29 +128,30 @@ msgstr[1] " "
 
 #: ../../_install.php:26
 #, php-format
-msgid ""
-"Eh Dummy requires eventHandler V%s minimum, V%s installed. Please update"
-msgstr ""
-"Eh Dummy requiert eventHandler V%s minimum, V%s installée. Veuillez mettre à "
-"jour"
+msgid "Eh Dummy requires eventHandler V%s minimum, V%s installed. Please update"
+msgstr "Eh Dummy requiert eventHandler V%s minimum, V%s installée. Veuillez mettre à jour"
 
 #: ../../_install.php:43
 msgid "Eh Repeat requires eventHandler"
 msgstr "Eh Repeat dépend de eventHandler"
 
-#: ../../_install.php:46 ../../tpl/settings.tpl:24
+#: ../../_install.php:46
+#: ../../tpl/settings.tpl:24
 msgid "Duration for automatic events generation"
 msgstr "Durée pour la génération automatique d'événements"
 
-#: ../../_install.php:47 ../../tpl/settings.tpl:39
+#: ../../_install.php:47
+#: ../../tpl/settings.tpl:39
 msgid "Week starts on sunday"
 msgstr "La semaine commence le dimanche"
 
-#: ../../_install.php:48 ../../tpl/settings.tpl:44
+#: ../../_install.php:48
+#: ../../tpl/settings.tpl:44
 msgid "Replace event end date by event duration"
 msgstr "Remplacer la date de fin de l'événement par sa durée"
 
-#: ../../_install.php:49 ../../tpl/settings.tpl:49
+#: ../../_install.php:49
+#: ../../tpl/settings.tpl:49
 msgid "Minutes accuracy"
 msgstr "Précision des minutes"
 
@@ -172,29 +191,23 @@ msgstr "Impossible d'obtenir %s, champ inconnu"
 msgid "The frequency string %s is incorrect"
 msgstr "La chaîne de fréquence %s est incorrecte"
 
-#: ../../js/event.js:20
-msgid "days"
-msgstr "jours"
-
-#: ../../js/event.js:36
+#: ../../js/event.js:35
 msgid ":|hour separator"
 msgstr "h"
 
-#: ../../js/event.js:49
+#: ../../js/event.js:48
 msgid "hr|hour symbol"
 msgstr "h"
 
-#: ../../js/event.js:54
+#: ../../js/event.js:53
 msgid "Duration :"
 msgstr "Durée :"
 
-#: ../../js/event.js:77 ../../js/eventeditor.js:21
-msgid "day"
-msgid_plural "days"
-msgstr[0] "jour"
-msgstr[1] "jours"
+#: ../../js/event.js:122
+msgid "Please set a date first"
+msgstr "Veuillez indiquer une date"
 
-#: ../../js/event.js:169
+#: ../../js/event.js:193
 msgid "bad frequency string"
 msgid_plural "bad frequency strings"
 msgstr[0] "mauvaise chaîne de fréquence"
@@ -204,67 +217,185 @@ msgstr[1] "mauvaises chaînes de fréquence"
 msgid "week"
 msgstr "semaine"
 
-#: ../../js/eventeditor.js:135
+#: ../../js/eventeditor.js:24
+msgid "April"
+msgstr "avril"
+
+#: ../../js/eventeditor.js:24
+msgid "August"
+msgstr "août"
+
+#: ../../js/eventeditor.js:24
+msgid "December"
+msgstr "décembre"
+
+#: ../../js/eventeditor.js:24
+msgid "February"
+msgstr "février"
+
+#: ../../js/eventeditor.js:24
+msgid "January"
+msgstr "janvier"
+
+#: ../../js/eventeditor.js:24
+msgid "July"
+msgstr "juillet"
+
+#: ../../js/eventeditor.js:24
+msgid "June"
+msgstr "juin"
+
+#: ../../js/eventeditor.js:24
+msgid "March"
+msgstr "mars"
+
+#: ../../js/eventeditor.js:24
+msgid "May"
+msgstr "mai"
+
+#: ../../js/eventeditor.js:24
+msgid "November"
+msgstr "novembre"
+
+#: ../../js/eventeditor.js:24
+msgid "October"
+msgstr "octobre"
+
+#: ../../js/eventeditor.js:24
+msgid "September"
+msgstr "septembre"
+
+#: ../../js/eventeditor.js:25
+msgid "Friday"
+msgstr "vendredi"
+
+#: ../../js/eventeditor.js:25
+msgid "Monday"
+msgstr "lundi"
+
+#: ../../js/eventeditor.js:25
+msgid "Satudray"
+msgstr "samedi"
+
+#: ../../js/eventeditor.js:25
+msgid "Sunday"
+msgstr "dimanche"
+
+#: ../../js/eventeditor.js:25
+msgid "Thursday"
+msgstr "jeudi"
+
+#: ../../js/eventeditor.js:25
+msgid "Tuesday"
+msgstr "mardi"
+
+#: ../../js/eventeditor.js:25
+msgid "Wednesday"
+msgstr "mercredi"
+
+#: ../../js/eventeditor.js:26
+msgid "Every|week"
+msgstr "Chaque"
+
+#: ../../js/eventeditor.js:26
+msgid "the 1st|day"
+msgstr "le 1er"
+
+#: ../../js/eventeditor.js:26
+msgid "the 2nd|day"
+msgstr "le 2ème"
+
+#: ../../js/eventeditor.js:27
+msgid "the 3rd|day"
+msgstr "le 3ème"
+
+#: ../../js/eventeditor.js:27
+msgid "the 4th|day"
+msgstr "le 4ème"
+
+#: ../../js/eventeditor.js:27
+msgid "the 5th|day"
+msgstr "le 5ème"
+
+#: ../../js/eventeditor.js:28
+msgid "Every|day"
+msgstr "Chaque"
+
+#: ../../js/eventeditor.js:28
+msgid "the 1st|week"
+msgstr "la 1ère"
+
+#: ../../js/eventeditor.js:28
+msgid "the 2nd|week"
+msgstr "la 2ème"
+
+#: ../../js/eventeditor.js:29
+msgid "the 3rd|week"
+msgstr "la 3ème"
+
+#: ../../js/eventeditor.js:29
+msgid "the 4th|week"
+msgstr "la 4ème"
+
+#: ../../js/eventeditor.js:29
+msgid "the 5th|week"
+msgstr "la 5ème"
+
+#: ../../js/eventeditor.js:139
 msgid "Bad string to parse: %s"
 msgstr "Mauvaise chaîne à analyser: %s"
 
-#: ../../js/eventeditor.js:174 ../../js/eventeditor.js:176
+#: ../../js/eventeditor.js:181
+msgid "Every day"
+msgstr "Chaque"
+
+#: ../../js/eventeditor.js:185
+msgid "on every day"
+msgstr "chaque"
+
+#: ../../js/eventeditor.js:191
+#: ../../js/eventeditor.js:207
+#: ../../js/eventeditor.js:216
+#: ../../js/eventeditor.js:226
+msgid " & "
+msgstr " & "
+
+#: ../../js/eventeditor.js:191
+msgid "on %s"
+msgstr "%s"
+
+#: ../../js/eventeditor.js:199
+msgid " and "
+msgstr " et "
+
+#: ../../js/eventeditor.js:201
+#: ../../js/eventeditor.js:207
+msgid " on %s "
+msgstr " %s"
+
+#: ../../js/eventeditor.js:210
+msgid "week day"
+msgstr "jour de la semaine"
+
+#: ../../js/eventeditor.js:220
+msgid " of every month"
+msgstr "de chaque mois"
+
+#: ../../js/eventeditor.js:226
+msgid " of %s"
+msgstr " de %s"
+
+#: ../../js/eventeditor.js:243
+#: ../../js/eventeditor.js:245
 #: ../../tpl/event_editor.tpl:23
 msgid "Exclude"
 msgstr "Exclure"
 
-#: ../../js/eventeditor.js:174 ../../js/eventeditor.js:176
+#: ../../js/eventeditor.js:243
+#: ../../js/eventeditor.js:245
 #: ../../tpl/event_editor.tpl:22
 msgid "Include"
 msgstr "Inclure"
-
-#: ../../js/eventeditor.js:339
-msgid "Every|week"
-msgstr "Chaque"
-
-#: ../../js/eventeditor.js:339
-msgid "the 1st|day"
-msgstr "le 1er"
-
-#: ../../js/eventeditor.js:339
-msgid "the 2nd|day"
-msgstr "le 2ème"
-
-#: ../../js/eventeditor.js:340
-msgid "the 3rd|day"
-msgstr "le 3ème"
-
-#: ../../js/eventeditor.js:340
-msgid "the 4th|day"
-msgstr "le 4ème"
-
-#: ../../js/eventeditor.js:340
-msgid "the 5th|day"
-msgstr "le 5ème"
-
-#: ../../js/eventeditor.js:341
-msgid "Every|day"
-msgstr "Chaque"
-
-#: ../../js/eventeditor.js:341
-msgid "the 1st|week"
-msgstr "la 1ère"
-
-#: ../../js/eventeditor.js:341
-msgid "the 2nd|week"
-msgstr "la 2ème"
-
-#: ../../js/eventeditor.js:342
-msgid "the 3rd|week"
-msgstr "la 3ème"
-
-#: ../../js/eventeditor.js:342
-msgid "the 4th|week"
-msgstr "la 4ème"
-
-#: ../../js/eventeditor.js:342
-msgid "the 5th|week"
-msgstr "la 5ème"
 
 #: ../../tpl/event_editor.tpl:1
 msgid "Repetitive event"
@@ -327,11 +458,8 @@ msgid "Ok"
 msgstr "Ok"
 
 #: ../../tpl/event_editor.tpl:58
-msgid ""
-"The rules here will determine how the recurrent events will be generated."
-msgstr ""
-"Les règles présentées ici vont déterminer comment les événements seront "
-"répétés."
+msgid "The rules here will determine how the recurrent events will be generated."
+msgstr "Les règles présentées ici vont déterminer comment les événements seront répétés."
 
 #: ../../tpl/event_editor.tpl:63
 msgid "These settings will generate the following dates:"
@@ -343,17 +471,8 @@ msgstr "Calcul en cours"
 
 #: ../../tpl/event_editor.tpl:70
 #, php-format
-msgid ""
-"The rules and exceptions above would generate events for each of the date "
-"computed here on page save.<br/>These dates were computed on a %d days "
-"period.<br/>You may change this setting on the <a href=\"%s\" target=\"new"
-"\">xEventHandler plugin administration page.</a>"
-msgstr ""
-"Les règles et exceptions ci-dessus généreraient à l'enregistrement un "
-"événement pour chacune des dates calculées ici.<br/>Ces dates ont été "
-"calculées sur une période de %d jours.<br/>Vous pouvez changer ce réglage "
-"sur la <a href=\"%s\" target=\"new\"> page d'administration de l'eXtension "
-"du Gestionnaire d'Événements.</a>"
+msgid "The rules and exceptions above would generate events for each of the date computed here on page save.<br/>These dates were computed on a %d days period.<br/>You may change this setting on the <a href=\"%s\" target=\"new\">xEventHandler plugin administration page.</a>"
+msgstr "Les règles et exceptions ci-dessus généreraient à l'enregistrement un événement pour chacune des dates calculées ici.<br/>Ces dates ont été calculées sur une période de %d jours.<br/>Vous pouvez changer ce réglage sur la <a href=\"%s\" target=\"new\"> page d'administration de l'eXtension du Gestionnaire d'Événements.</a>"
 
 #: ../../tpl/event_editor.tpl:73
 msgid "Frequency format string"
@@ -374,3 +493,6 @@ msgstr "activation d'ehRepeat"
 #: ../../tpl/settings.tpl:19
 msgid "Enable ehRepeat Addon"
 msgstr "Activer le module ehRepeat"
+
+#~ msgid "days"
+#~ msgstr "jours"

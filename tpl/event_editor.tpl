@@ -1,4 +1,4 @@
-<div id="ehrepeat-editor"><p id="ehrepeat-editor-title"> <?php echo form::checkbox('rpt_active', '1', $rpt_active) . __('Repetitive event'); ?> </p>
+<div id="ehrepeat-editor"><p id="ehrepeat-editor-title"> <?php echo form::checkbox('rpt_active', '1', $rpt_active) . __('Repetitive event'); ?> </p><p class="error" style="display:none;"></p>
 	<div id="ehrepeat-editor-content" style="display:none;">
 		<div id="rpt-freq-editor">
 			<div class="two-cols">
@@ -10,7 +10,7 @@
 						</p>
 						<div id="rpt-display">
 							<!-- placeholder for the rules-->
-							<p class="rpt-display-line rpt-display-template">
+							<p class="rpt-display-template">
 								<input type="text" size="10" />
 								<span></span>
 								<button type="button" title="<?php echo __("Delete this line"); ?>" disabled="disabled">-</button>
@@ -58,6 +58,7 @@
 						<div class="rpt-editor-help"><?php echo __("The rules here will determine how the recurrent events will be generated."); ?>
 						</div>
 					</div>
+					<div id="rpt_result"></div>
 				</div>
 				<div class="col">
 					<p id="rpt-slaves-title"><?php echo __('These settings will generate the following dates:'); ?> - <span>&nbsp</span></p>
@@ -70,7 +71,7 @@
 						<div class="rpt-editor-help"><?php echo sprintf(__('The rules and exceptions above would generate events for each of the date computed here on page save.<br/>These dates were computed on a %d days period.<br/>You may change this setting on the <a href="%s" target="new">xEventHandler plugin administration page.</a>'), $core->blog->settings->eventHandler->rpt_duration, "plugin.php?p=eventHandler&part=settings#conf"); ?></div>
 					</div>
 					<div class="fieldset">
-						<p><label for='rpt_freq'><?php echo __('Frequency format string'); ?></label><?php echo form::field('rpt_freq', 50, 255, $rpt_freq, 'maximal', 0, false, $rpt_freq_protected ? " protected='protected'" : ""); ?> </p>
+						<p><label for='rpt_freq'><?php echo __('Frequency format string'); ?></label><?php echo form::field('rpt_freq', 50, 255, $rpt_freq, 'maximal', 0, false, /*$rpt_freq_protected ? " protected='protected'" : ""*/""); ?> </p>
 						<p><label for='rpt_exc'><?php echo __('Exceptions strings'); ?></label><?php echo form::textArea('rpt_exc', 15, 5, implode("\n", $rpt_exc)); ?></p>
 						<p id="rpt_freq_error"> &nbsp; </p>
 					</div>

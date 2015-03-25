@@ -35,7 +35,7 @@ class rsEhRepeatPublic extends rsExtPost
     
     public static function getExc($rs)
     {
-        return self::isRepeat($rs)?implode(';',$rs->rpt_exc):array();
+        return self::isRepeat($rs)?explode(';',$rs->rpt_exc):array();
     }
 	
 	public static function countSlaves($rs)

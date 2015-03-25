@@ -79,14 +79,12 @@ function replaceEndtByDuration() {
 	});
 
 	$("#event_startdt").on('change', startdtChange=function(){
-		console.log("dt: chuis toujours là");
 		var dt=$(this).val().toDSDate();
 		if(dt!==null && $('#event_enddt').val()==''){
 			//we initialize enddt with 1h duration.
 			var enddt=new Date(Number(dt)+3600000);
 			$("#event_enddt").val(enddt.toDString()).change();
 			$(this).off('change',startdtChange);
-			console.log("dt: je m'casse");
 		}
 	});
 
@@ -112,10 +110,24 @@ function replaceEndtByDuration() {
 
 $(document).ready(function () {
 
+	$('#event_startdt,#event_enddt').each(function(i,e){
+		$.datepicker._get($.datepicker._getInst(e),'timepicker')._defaults.stepMinute=rpt_minute_step;
+	});
+	
 	/*Toggles the xevent editor display*/
 	$('#rpt_active').change(function () {
 		if (this.checked) {
-			$("#ehrepeat-editor-content").slideDown();
+			if($("#event_startdt").val()!=''){
+				$("#ehrepeat-editor-title+p.error").hide();
+				$("#ehrepeat-editor-content").slideDown();
+			}else{
+				$("#ehrepeat-editor-title+p.error").text(__('Please set a date first')).show();
+				this.checked=false;
+				$("#event_startdt").one('change',function () {
+					$("#ehrepeat-editor-title+p.error").hide();
+					$("#ehrepeat-editor-title").click();
+				});
+			}
 		} else {
 			$("#ehrepeat-editor-content").slideUp();
 		}
@@ -126,21 +138,6 @@ $(document).ready(function () {
 		if ($(this).attr("submit_lock"))
 			return false;
 	});
-
-	//Get number of slaves for update / create messages
-	if ($("#id").length > 0 && $('#rpt_active').prop('checked'))
-		$.get('services.php', {
-			f: 'countSlaves',
-			master_id: $('#id').val()
-		}, function (rsp) {
-			if ($(rsp).attr('status') == 'failed')
-				return false;
-			var nbSlaves = $(rsp).find('value').text();
-			if (nbSlaves.length == 0)
-				return;
-			var message = $('.message').html() + nbSlaves;
-			$('.message').html(message);
-		});
 
 	//Change the event_enddt to a duration info
 	replaceEndtByDuration();
@@ -160,7 +157,11 @@ $(document).ready(function () {
 			if (matches2) {
 				var m = String(Number(matches[3]));
 				var h = String(Number(matches[2]));
-
+				var exc=$("#rpt_exc").val().split("\n");
+				exc.each(function (e,i) {
+					exc[i]=e.replace(/\d\d:\d\d/,h.padZero(2)+":"+m.padZero(2));
+				});
+				$("#rpt_exc").val(exc.join("\n"));
 				$("#rpt_freq:not([protected])").val(m + " " + h + " " + matches2[1]).change();
 			}
 		}
@@ -174,23 +175,25 @@ $(document).ready(function () {
 			return;
 		debug('#rpt_freq change');
 		var e;
+		if(!xFrequency.isFreqStr())
 		try {
-			this.freq = new xFrequency($(this).val());
+			var freq = new xFrequency($(this).val());
 		} catch (e) {
 			$('#rpt_freq_error').html('<em>' + e.message + '</em>');
 			$('#rpt_freq').addClass('error').focus();
 			$('#entry-form').attr("submit-lock", "1");
-			$("#rpt-slaves-dates").addClass('error').html(__("bad frequency string", "bad frequency strings", 1));
+			$("#rpt-slaves-dates").addClass('error').html(__("bad frequency string"));
 			return false;
 		}
 		$('#rpt_freq_error').empty();
-		$('#rpt_freq').removeClass('eProprror');
+		$('#rpt_freq').removeClass('error');
 		$('#entry-form').removeAttr("submit-lock");
 
 		//Update the slave dates
 		$.get('services.php', {
 			f: 'computeDates',
 			freq: $(this).val(),
+			exc: $("#rpt_exc").val().split('\n').join(';'),
 			startdt: $('#event_startdt').val()
 		}, function (rsp) {
 			if ($(rsp).attr('status') == 'failed') {

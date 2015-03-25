@@ -130,24 +130,31 @@ class adminEhRepeat {
 		foreach ($args as $v => $k)
 			$$v = &$args[$v];
 
-		global $core;
+		global $core, $rpt_filter;
 		$rpt_filter = !empty($_GET['rpt_filter']) ? $_GET['rpt_filter'] : 1;
 		if (!$core->error->flag()) {
 			global $rpt_filter_combo;
-			$rpt_filter_combo = array(__('Master and regular') => 1, __('All') => 2);
+			$rpt_filter_combo = array(__('Master and regular') => 1, __('Repetitive events') => 2, __('All') => 3);
 		}
 
 		# - Selected filter
 		if ($rpt_filter == 1) {
 			$params['noslaves'] = true;
 			$show_filters = false;
+		} else if ($rpt_filter == 2) {
+			$params['repetitives'] = true;
+			$show_filters = true;
 		} else {
-			$show_filters = false;
+			$show_filters = true;
 		}
 
 		$redir = $redir . '&amp;rpt_filter=' . $rpt_filter;
 
 		$hidden_fields = $hidden_fields . form::hidden(array('rpt_filter'), $rpt_filter);
+
+		$sortby_combo[__("Repetitive events")] = 'rpt_evnt';
+
+		$params['sortby'] = !empty($_GET['sortby']) ? $_GET['sortby'] : null;
 	}
 
 	#this behavior is used to customize the event mini list displayed during
@@ -191,12 +198,11 @@ class adminEhRepeat {
 
 		/* to get the slaves, give master_id in $params['slaves'] */
 		if (!empty($params['slaves'])) {
-			$params['rpt_master'] = $params['slaves'];
-			$params['sql'] .= " AND EH.post_id != EH.rpt_master AND EH.rpt_master IS NOT NULL";
+			$params['sql'] .= " AND EH.post_id != EH.rpt_master AND EH.rpt_master = " . $params['slaves'];
 			unset($params['slaves']);
 		}
 
-		/* to get only masters, set params['master'] to true */
+		/* to get only masters, set params['masters'] to true */
 		if (!empty($params['masters'])) {
 			$params['sql'] .= " AND EH.rpt_master = P.post_id ";
 			unset($params['masters']);
@@ -210,9 +216,32 @@ class adminEhRepeat {
 
 		/* to get master and slaves for a master if */
 		if (!empty($params['masterandslaves'])) {
-			$params['rpt_master'] = $params['masterandslaves'];
+			$params['sql'] .= " AND EH.rpt_master = " . $params['masterandslaves'];
+		}
+
+		/* to get masters and slaves */
+		if (!empty($params['repetitives'])) {
 			$params['sql'] .= " AND EH.rpt_master IS NOT NULL";
-			unset($params['slaves']);
+		}
+
+		if (!empty($params['sortby']) && $params['sortby'] == 'rpt_evnt') {
+			$col = (array) $params['columns'];
+			$col[] = 'S.master';
+			$col[] = 'S.status';
+			$col[] = 'C.nbslaves';
+			$params['columns'] = $col;
+
+			$params['from'].=" INNER JOIN (SELECT post_id as id, rpt_master as master, if(rpt_master IS NULL,'-', if(rpt_master = post_id,'M','S')) as status FROM  dc_eventhandler) S on S.id = P.post_id LEFT JOIN (SELECT CEH.rpt_master as master, count(distinct CP.post_id) AS nbslaves FROM dc_post CP INNER JOIN dc_eventhandler CEH ON  CEH.post_id = CP.post_id WHERE CP.blog_id = 'default' AND  CP.post_type = 'eventhandler' and CEH.rpt_master != CP.post_id AND CEH.rpt_master=4) C on C.master = P.post_id";
+			$order = !empty($_GET['order']) ? $_GET['order'] : 'desc';
+
+			if (!empty($params['repetitives'])) {
+				$params['order'] = 'EH.rpt_master ' . $order . ', S.status ' . $order . ', P.post_dt ' . $order;
+			} else {
+				$params['order'] = 'S.status ' . $order . ', EH.rpt_master ' . $order . ', P.post_dt ' . $order;
+			}
+			unset($params['repetitives']);
+			unset($params['masterandslaves']);
+			unset($params['sortby']);
 		}
 	}
 
@@ -276,12 +305,17 @@ class adminEhRepeat {
 		if ($ismini)
 			$num++;#Minilist adds a 'period' column so we increase $num
 		$rep = $rs->countSlaves();
-		if ($rep == -2)
-			$rep = '-';
-		else if ($rep == -1)
+		if ($rep == -2) {
+			$rep = __('G');
+		} else if ($rep == -1) {
 			$rep = __('N/A');
-
+		}
 		$columns = array_merge(array_slice($columns, 0, $num), array("<td>" . $rep . "</td>"), array_slice($columns, $num));
+		if ($rep == __('G')) {
+			foreach ($columns as $i => $col) {
+				$columns[$i] = preg_replace("/(<td[^>]*)(>)/", "\\1 style=\"background-color:#ffffcc !important;font-style:italic;\"\\2", $col);
+			}
+		}
 	}
 
 	#this behavior is for action combo manipulation. 
@@ -301,7 +335,58 @@ class adminEhRepeat {
 	#This callback is called when the action combo is used on post action page
 
 	public static function doChangeRepeat($core, dcPostsActionsPage $ap, $post) {
-		
+		global $eventHandler;
+		try {
+			if (!$eventHandler) {
+				$eventHandler = new eventHandler($core);
+			}
+			$ehRepeat = new ehRepeat($eventHandler);
+
+			if ($ap->getAction() == 'generate') {
+				foreach ($ap->getIDs() as $entry) {
+					$masterdtchanged = false;
+					$count = $ehRepeat->generateSlaves($entry, $masterdtchanged);
+					if ($masterdtchanged) {
+						dcPage::addWarningNotice(sprintf(__("Event %d was outdated, it has been updated."), $entry));
+					}
+					if ($count == -1) {
+						dcPage::addWarningNotice(sprintf(
+										__("Could not generate repetitive events for event %d"), $entry));
+					} else {
+						dcPage::addSuccessNotice(sprintf(
+										__("%d repetitive event generated for event %d", '%d repetitive events generated for event %d', $count), $count, $entry));
+					}
+				}
+			} else if ($ap->getAction() == 'mkunique') {
+				//Switches a slave event to a regular one (and creates an exception for the parent event to avoid 
+				//double event on the same date)
+				foreach ($ap->getIDs() as $entry) {
+					$res = $ehRepeat->freeSlaveEvent($entry);
+					if (!$res) {
+						dcPage::addWarningNotice(sprintf(
+										__("Could not make event %d unique, not a repeated event"), $entry));
+					} else {
+						dcPage::addSuccessNotice(sprintf(
+										__("Event %d was successfully made unique"), $entry));
+						$masterdtchanged = false;
+						$count = $ehRepeat->generateSlaves($entry, $masterdtchanged);
+						if ($masterdtchanged) {
+							dcPage::addWarningNotice(sprintf(__("Event %d was outdated, it has been updated."), $entry));
+						}
+						if ($count == -1) {
+							dcPage::addWarningNotice(sprintf(
+											__("Could not generate repetitive events for event %d"), $entry));
+						} else {
+							dcPage::addSuccessNotice(sprintf(
+											__("%d repetitive event generated for event %d", '%d repetitive events generated for event %d', $count), $count, $entry));
+						}
+					}
+				}
+			}
+			$ap->redirect(false);
+		} catch (Exception $e) {
+			$core->error->add($e->getMessage());
+		}
 	}
 
 	/* This behavior inserts some content just below the eventhandler specific part on event creation/edition page
@@ -327,11 +412,11 @@ class adminEhRepeat {
 			$rpt_freq_protected = $rpt_active;
 			$rpt_slave = $post->isSlave();
 		}
-		
+
 		if (!empty($_POST) && $can_edit_post) {
 			$rpt_active = !empty($_POST['rpt_active']);
 			$rpt_freq = isset($_POST['rpt_freq']) ? $_POST['rpt_freq'] : $rpt_freq;
-			$rpt_exc = isset($_POST['rpt_exc']) ? explode(';', $_POST[rpt_exc]) : $rpt_exc;
+			$rpt_exc = isset($_POST['rpt_exc']) ? explode(';', $_POST['rpt_exc']) : $rpt_exc;
 			$rpt_freq_protected = true;
 		}
 
@@ -368,11 +453,10 @@ class adminEhRepeat {
 	/* this behavior is used to perform some specific actions after event creation */
 
 	public static function adminAfterEventHandlerCreateOrUpdate($cur_post, $cur_event, $post_id) {
-		global $eventHandler;
-		global $ehRepeat;
+		global $eventHandler, $ehRepeat, $core;
 		try {
 			if (!isset($ehRepeat))
-				$ehRepeat = new ehRepeat($eventhandler);
+				$ehRepeat = new ehRepeat($eventHandler);
 
 			$rpt_master = isset($_POST['rpt_active']) ? (integer) $post_id : null;
 			$rpt_freq = isset($_POST['rpt_freq']) ? $_POST['rpt_freq'] : null;
@@ -381,14 +465,27 @@ class adminEhRepeat {
 			if (isset($_POST['rpt_active']) && $rpt_freq == null)
 				throw (new Exception(__("You have to provide a frequency for a recurrent event.")));
 			$cur_event->rpt_freq = $rpt_freq;
-			$cur_event->rpt_exc = $rpt_exc;
+			$cur_event->rpt_exc = preg_replace('/[\r\n]{1,2}/', ';', $rpt_exc);
 			$cur_event->rpt_master = $rpt_master;
-			$eventHandler->updEvent($post_id, $cur_event, $cur_post);
-			$ehRepeat->generateSlaves($rpt_master);
+			$eventHandler->updEvent($post_id, $cur_post, $cur_event);
+			if ($rpt_master) {
+				$oldmasterrenewed = false;
+					$count = $ehRepeat->generateSlaves($rpt_master, $masterdtchanged);
+					if ($masterdtchanged) {
+						dcPage::addWarningNotice(sprintf(__("Event %d was outdated, it has been updated."), $rpt_master));
+					}
+					if ($count == -1) {
+						dcPage::addWarningNotice(sprintf(
+										__("Could not generate repetitive events for event %d"), $rpt_master));
+					} else if($count>0) {
+						dcPage::addSuccessNotice(sprintf(
+										__("%d repetitive event generated for event %d", '%d repetitive events generated for event %d', $count), $count, $rpt_master));
+					}
+			}
 		} catch (Exception $e) {
 			/* we have to reverse the creation as something went wrong */
 			try {
-				$eventHandler->delEvent($post_id);
+				//$eventHandler->delEvent($post_id);
 			} catch (Exception $e1) {
 				throw new Exception($e1->getMessage(), 0, $e);
 			}
@@ -401,7 +498,7 @@ class adminEhRepeat {
 	public static function adminBeforeEventHandlerDelete($post_id) {
 		global $eventHandler, $ehRepeat;
 		if (!isset($ehRepeat))
-			$ehRepeat = new ehRepeat($eventhandler);
+			$ehRepeat = new ehRepeat($eventHandler);
 
 		$ehRepeat->deleteSlaves($post_id);
 	}
@@ -409,38 +506,36 @@ class adminEhRepeat {
 	/* this behavior is used to manipulate the actions combo for the index_events.php page */
 
 	public static function adminEventHandlerActionsCombo($combo_actions) {
-		/* 		$combo_actions[0][__('Dummy')] = array(
-		  __('Set dummy') => 'dummify',
-		  __('Set not dummy') => 'undummify'
-		  ); */
+		$combo_actions[0][__('Repeat Events')] = array(
+			__('Regenerate all events from today') => 'generate',
+			__('Make unique') => 'mkunique'
+		);
 	}
 
 	/* this behavior is the place for events actions management */
 
 	public static function adminEventHandlerActionsManage(eventHandler $eh, $action) {
-		if ($action != 'dummify' && $action != 'undummify')
+		if ($action != 'generate' && $action != 'mkunique')
 			return;
-		global $p_url, $core;
-		try {
-			$redir = $core->getPostAdminURL($from_post->post_type, $from_post->post_id);
-			if (isset($_POST['redir']) && strpos($_POST['redir'], '://') === false) {
-				$redir = $_POST['redir'];
-			} elseif (!$redir) {
-				$redir = $p_url . '&part=events';
+		global $core, $eventHandler;
+		if (isset($_REQUEST['redir'])) {
+			$u = explode('?', $_REQUEST['redir']);
+			$uri = $u[0];
+			if (isset($u[1])) {
+				parse_str($u[1], $args);
 			}
-			$entries = $_POST['entries'];
-
-			$cur_event = $core->con->openCursor($core->prefix . 'eventhandler');
-			$cur_event->dummy = ($action == 'dummify') ? 1 : 0;
-			$cur_event->update('WHERE post_id ' . $core->con->in($entries));
-			dcPage::addSuccessNotice(sprintf(
-							__(' ', ' ', count($entries)
-							), count($entries), ($action == 'dummify') ? '' : 'un'
-			));
-			http::redirect($redir);
-		} catch (Exception $e) {
-			$core->error->add($e->getMessage());
+			$args['redir'] = $_REQUEST['redir'];
+		} else {
+			$uri = $core->getPostAdminURL($from_post->post_type, $from_post->post_id);
+			$args = array();
 		}
+		$_REQUEST['action'] = $action;
+		$posts_actions_page = new dcPostsActionsPage($core, $uri, $args);
+		$posts_actions_page->setEnableRedirSelection(false);
+		if (!$eventHandler) {
+			$eventHandler = $eh;
+		}
+		$posts_actions_page->process();
 	}
 
 	/* @func AdminEhRepeat::adminEventHandlerCustomEventTpl
@@ -451,6 +546,9 @@ class adminEhRepeat {
 	 */
 
 	public static function adminEventHandlerCustomEventTpl() {
+		
+		global $message;
+		$message.= dcPage::notices();
 		#include(dirname(__FILE__).'/tpl/custom_event.tpl');
 		#exit;
 	}

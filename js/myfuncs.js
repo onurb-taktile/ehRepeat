@@ -54,7 +54,7 @@ String.prototype.ordinalize = function () {
 	}
 };
 
-Number.prototype.ordinalize = function () {
+Number.prototype.ordinalize =	function () {
 	return String(this).ordinalize();
 };
 
@@ -97,6 +97,18 @@ Array.range = function (start, end, step) {
 	return ret;
 };
 
+/*
+ * checks if an array is a full range as specified with the range arg
+ * @param array range : [minval,maxval,step]
+ * @returns boolean
+ */
+Array.prototype.isFullRange = function(range){
+	if(!range || !isArray(range) || range.length<2 || range.length>3)
+		throw "Array.isFullRange : wrong arguments "+range;
+	var step=range[2] || 1;
+	var tmp=this.unique();
+	return !((tmp.length!=Math.floor((range[1]-range[0])/step)+1) || (tmp[0]!=range[0]) || (tmp[tmp.length-1]!=range[1]));
+};
 
 Array.prototype.sortn = function (desc) {
 	var desc = desc || false;
@@ -130,12 +142,12 @@ Array.unique = function (arr) {
 	return (arr && arr.unique()) || null;
 };
 
-Array.prototype.each = function (cb) {
+Array.prototype.each = function (cb,data) {
 	var ret = false;
 	if (cb !== undefined) {
 		ret = true;
 		for (var i = 0; i < this.length; i++) {
-			if (cb(this[i], i) === false) {
+			if (cb(this[i], i,data) === false) {
 				ret = false;
 				break;
 			}
@@ -148,6 +160,30 @@ Array.prototype.each = function (cb) {
 
 Array.prototype.empty = function () {
 	return this.splice(0, this.length);
+};
+
+Array.prototype.join2=function(delimiter,delimiter2){
+	return this.slice(0,this.length>1?-1:1).join(delimiter)+(this.length>1?delimiter2+this[this.length-1]:'');
+};
+
+Array.join2=function(arr,delimiter,delimiter2){
+	return (arr && arr.join2(delimiter,delimiter2))|| null;
+};
+
+/*format an array with 2 delimiters - one to put between all elements but the last two and one to put between the last two.*/
+/*options : JSON {prefix:string, //to put before all elements
+									gprefix1:string, //to put before the first length-1 elements 
+									gprefix2: string //and before the last one
+									}
+*/
+Array.prototype.join3=function(d1,d2,options){
+	var options=options||{};
+	if(options.gprefix){
+		options.gprefix1=options.gprefix;
+		options.gprefix2=options.gprefix;		
+	}
+	return (options.gprefix1?options.gprefix1:'')+this.slice(0,this.length>1?-1:1).join((options.prefix?options.prefix:'')+d1)+
+		(this.length>1?(options.prefix?options.prefix:'')+d2+(options.gprefix2?options.gprefix2:'')+this[this.length-1]:'');
 };
 
 /*
