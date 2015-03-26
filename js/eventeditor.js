@@ -1,4 +1,4 @@
-//nogettextization please
+////nogettextization please
 /* -- BEGIN LICENSE BLOCK ----------------------------------
  *
  * This file is part of xEventHandler, a plugin for Dotclear 2.
@@ -24,10 +24,10 @@ var monthnames = ["", __("January"), __("February"), __("March"), __("April"), _
 ];
 var wdnames = [__("Sunday"), __("Monday"), __("Tuesday"), __("Wednesday"), __("Thursday"), __("Friday"), __("Satudray")
 ];
-var switchOpts = {day: [__("Every|week"), __("the 1st|day"), __("the 2nd|day"),
-		__("the 3rd|day"), __("the 4th|day"), __("the 5th|day")],
-	week: [__("Every|day"), __("the 1st|week"), __("the 2nd|week"),
-		__("the 3rd|week"), __("the 4th|week"), __("the 5th|week")]};
+var switchOpts = {day:[__("day"), [__("Every|week"), __("the 1st|day"), __("the 2nd|day"),
+		__("the 3rd|day"), __("the 4th|day"), __("the 5th|day")]],
+	week: [__("week"), [__("Every|day"), __("the 1st|week"), __("the 2nd|week"),
+		__("the 3rd|week"), __("the 4th|week"), __("the 5th|week")]]};
 
 
 function debug(msg) {
@@ -94,21 +94,22 @@ xFrequency.prototype.toHumanString = function (with_time) {
 
 
 	if (!swd || !sw) {
+		var which= (!sw && swd)?"week":"day";
 		if (sd)
 			ret = ""; //reset
 		else
 			ret += __(" and ");
 		if (sw) {
-			ret += sprintf(__(" on %s "), switchOpts.day[0]);
+			ret += sprintf(__(" on %s "), switchOpts[which][1][0]);
 		} else {
 			var weeks = this.get('weeks').copy();
 			weeks.each(function (e, i) {
-				weeks[i] = switchOpts[(swd ? 'day' : 'week')][Number(e)];
+				weeks[i] = switchOpts[which][1][Number(e)];
 			});
 			ret += sprintf(__(" on %s "), weeks.join2(', ', __(" & ")));
 		}
 		if (swd) {
-			ret += __("week day");
+			ret += __("week");
 		} else {
 			var wd = this.get('weekdays').copy();
 			wd.each(function (e, i) {
@@ -118,7 +119,7 @@ xFrequency.prototype.toHumanString = function (with_time) {
 		}
 	}
 	if (sm) {
-		ret += __(" of every month");
+		ret += __(" of the month");
 	} else {
 		var months = this.get('months').copy();
 		months.each(function (e, i) {
@@ -176,9 +177,10 @@ function rpt_display_add_line(auto) {
 	if (!auto)
 		$("#rpt-rule-add").attr("disabled", "disabled");
 	else {
-		$("#rpt-display>p:last>button").prop('disabled', false);
+		$("#rpt-display>p:last>button").removeAttr('disabled');
 		$("#rpt-display>p:last").addClass("rpt-display-auto");
-	}
+	}			
+	$("#xered-mode").val("").change();
 }
 
 /* @func rpt_display_load
@@ -264,9 +266,15 @@ function xered_validate() {
  * disabled: is an array of selectors to disable
  */
 var xeredModeToggles = {
-	'': {show: [], hide: ["#xered-action+*:not(button)"], disable: ["#xered-action"]},
-	'+': {on: ["#xered-action+*:not(#xered-ac-date)"], off: ["#xered-ac-date"], disabled: ["#xered-action>option[value='date']"]},
-	'-': {on: [], off: []}
+	'fn': {enable: function (t) {
+			$(t).removeAttr("disabled");
+		}, disable: function (t) {
+			$(t).attr("disabled", "disabled");
+		}},
+	'*': {hide: "#xered-mode~*", enable: "#xered-mode~*:not(button)", change: "#xered-action"},
+	'': {show: "#xered-action", disable: "#xered-action"},
+	'+': {show: ["#xered-action", "#xered-validate","#xered-action>option[value='all']"], hide: "#xered-action>option[value='date']", disable: "#xered-validate"},
+	'-': {show: ["#xered-action", "#xered-validate", "#xered-action>option[value='date']"],hide:"#xered-action>option[value='all']", disable: "#xered-validate"}
 };
 
 /* @var xeredActionToggles
@@ -282,6 +290,11 @@ var xeredActionToggles = {
 		$("#xered-action").nextUntil("button").hide();
 		if (action != "")
 			$("#xered-action + span").show();
+		$("#xered-validate").attr("disabled","disabled");
+		$("#xered-action~select").find("option:first").each(function(){
+			$(this).attr("selected","selected");
+		});
+		$("#xered-ac-date").val("");
 	},
 	'': function () {
 	}, //to disable default call
@@ -290,6 +303,10 @@ var xeredActionToggles = {
 			$("#xered-ac-weeks").change();
 		}
 		$("#rpt-rules-editor>[id^='xered-ac-week']").show().first().focus();
+	},
+	'all': function(mode,action) {
+		$("#xered-ac-all").show();
+		$("#xered-validate").removeAttr("disabled");
 	},
 	'default': function (mode, action) {
 		$("#xered-ac-" + action).show().first().focus();
@@ -315,37 +332,50 @@ var xeredValChecker = {
 };
 
 function xered_init() {
-	$("#xered-action").prop("disabled", true);
+	$("#xered-action").attr("disabled","disabled");
 	$("#xered-mode").change(function () {
-		$("#xered-action").prop("disabled", ($(this).val() == "")).focus();
 
+		//Use the xeredModeToggles state machine
+		["*", $(this).val()].each(function (mode, i, x) {
+			for (var action in x[mode]) {
+				var target = isArray(x[mode][action]) ? x[mode][action] : [x[mode][action]];
+				var fn = x.fn[action] || function (T, I, A) {
+					$(T)[A]();
+				};
+				target.each(function (t, i, f, a) {
+					f(t, i, a);
+				}, fn, action);
+			}
+		}, xeredModeToggles);
 	});
+
 	$("#xered-action").change(function () {
-		var a = $(this).val();
-		var m = $("#xered-mode").val();
-		xeredActionToggles['*'](m, a);
-		var cb = xeredActionToggles[a] || ((xeredActionToggles !== null) && xeredActionToggles['default']);
-		cb && cb(m, a);
+		var action = $(this).val();
+		var mode = $("#xered-mode").val();
+		["*",(xeredActionToggles[action]?action:"default")].each(function(e,i,m,a){
+			xeredActionToggles[e](m,a);
+		},mode,action);
 	});
 
-	$("#rpt-rules-editor>[id^='xered-ac-']:not([id^='xered-ac-week'])").change(function () {
-		$("#rpt-rules-editor>button").focus();
+
+	$("#xered-action~*[id^='xered-ac-']").change(function () {
+		var action=$("#xered-action").val();
+		var fn=xeredValChecker[action] || xeredValChecker.default;
+		if(fn.apply(this,[action])){
+			$("#xered-validate").removeAttr("disabled").focus();
+			if($(this).attr('id')=='xered-ac-weeks'){
+				$("#xered-ac-weekdays").focus();
+			}
+		}else{
+			$("#xered-validate").attr("disabled","disabled");
+		}
 	});
 
-	$("#rpt-rules-editor>[id^='xered-ac-week']").change(function () {
-		$(this).next().focus();
-	});
 
 	$("#rpt-rule-add").click(function () {
+		rpt_display_load(true);
 		rpt_display_add_line();
 		//reset all controls
-		$("#rpt-rules-editor>select")
-				.find("option:first")
-				.each(function () {
-					$(this).attr("selected", "selected");
-				});
-		$("#rpt-rules-editor>input").val("");
-		$("#xered-action").nextUntil("button").hide();
 		$("#rpt-rules-editor").slideDown("fast", function () {
 			$("#xered-mode").focus();
 		});
@@ -354,6 +384,8 @@ function xered_init() {
 	$("#xered-validate").click(function () {
 		if (xered_validate()) {
 			$("#rpt-rules-editor").slideUp();
+			$("#xered-mode").val("").change();
+			$("#xered-action").val("").change();
 			$("#rpt-rule-add").removeAttr("disabled");
 		}
 	});
@@ -361,18 +393,16 @@ function xered_init() {
 	/*function to change the option labels for day or week*/
 
 	var switchOptions = function (which) {
-		switchOpts[which].each(function (elem, i) {
+		switchOpts[which][1].each(function (elem, i) {
 			$("#xered-ac-weeks>option:nth(" + i + ")").html(elem);
 		});
-		$("#xered-ac-weekdays>option:first").html(__(which));
+		$("#xered-ac-weekdays>option:first").html(switchOpts[which][0]);
 	};
 
-	$("#xered-ac-weeks").change(function () {
-		switchOptions(this.selectedIndex > 0 ? "week" : "day");
-	});
-
-	$("#xered-ac-weekdays").change(function () {
-		switchOptions(this.selectedIndex > 0 ? "day" : "week");
+	$("#xered-ac-weeks,#xered-ac-weekdays").change(function () {
+		var w=($("#xered-ac-weeks")[0].selectedIndex > 0);
+		var wd=($("#xered-ac-weekdays")[0].selectedIndex > 0);
+		switchOptions((w && !wd)?"week":"day");
 	});
 
 	$("select[id^='xered-ac-']").removeAttr("name");
@@ -393,30 +423,10 @@ function xered_init() {
 	rpt_display_load(true);
 }
 
-//modifies .rpt-editor-help divs to make them foldable
-function helpify() {
-	$(".rpt-editor-help").each(function () {
-		$(this).wrapInner('<div class="rpt-editor-help-content"></div>');
-		$(this).prepend('<div class="rpt-editor-help-button"><a href="#">-</a></div></div>');
-		$(this).find("a").click(function () {
-			if ($(this).text() == "+") {
-				$(this).parent().next().slideDown();
-				$(this).text("-");
-			} else {
-				$(this).parent().next().slideUp();
-				$(this).text("+");
-			}
-			return false;
-		});
-	});
-
-
-}
 
 $(document).ready(function () {
 	var start = function () {
 		xered_init();
-		helpify();
 	};
 	if ($("#rpt_active")[0].checked) {
 		start();

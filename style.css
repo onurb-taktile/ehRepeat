@@ -49,8 +49,27 @@ input[type=text].error{
 
 
 #rpt-slaves-dates {
-	overflow-y: scroll;
-	max-height: 150px;
+	overflow-y: auto;
+	height: 200px;
+}
+
+.loading{
+	background-image: url('index.php?pf=ehRepeat/waiting.gif');
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+
+.loading > *	{
+	opacity:0.3;
+}
+
+#rpt-rules-editor-header {
+	height:27px;
+	margin-bottom:3px;
+}
+#rpt-display {
+	height: 170px;
+	overflow-y: auto;
 }
 
 #rpt-slaves-dates-wip {
@@ -126,9 +145,15 @@ input[type=text].error{
 /*Rule editor div = toolbox*/
 
 #rpt-rules-editor {
-	clear:both;
-	display:block;
-	margin-bottom:29px;
+	position: absolute;
+	background-color: aliceblue;
+	height: 37px;
+	width: 100%;
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
+	padding: 9px 8px;
+	border: 1px dotted darkslateblue;
+	top: -13px;
 }
 
 #rpt-rules-editor>:not(button){
@@ -168,10 +193,6 @@ input[type=text].error{
 	text-align:center;		
 }
 
-#rpt-display {
-    max-height: 200px;
-    overflow-y: auto;
-}
 
 .rpt-display-line{
 	clear:both;

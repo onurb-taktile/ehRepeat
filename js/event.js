@@ -188,7 +188,8 @@ $(document).ready(function () {
 		$('#rpt_freq_error').empty();
 		$('#rpt_freq').removeClass('error');
 		$('#entry-form').removeAttr("submit-lock");
-
+		
+		$("#rpt-slaves-dates").addClass("loading");
 		//Update the slave dates
 		$.get('services.php', {
 			f: 'computeDates',
@@ -206,7 +207,7 @@ $(document).ready(function () {
 				res += "<li>" + $(this).text() + "</li>";
 			});
 			res += "</ol>";
-			$("#rpt-slaves-dates").removeClass('error').html(res);
+			$("#rpt-slaves-dates").removeClass('loading').removeClass('error').html(res);
 		});
 	}).change();
 });

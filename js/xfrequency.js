@@ -18,11 +18,11 @@ function xFrequency(s) {
 		} else if (typeof val == 'string') {
 			val = val.split(',')
 			val.each(function (e, i) {
-				val[i] = Number(e);
+				this[i] = Number(e);
 			});
 		}
 		if (isArray(val)) {
-			if (val.inLimits(xFrequencyLimits[name], true)) {
+			if (val.inLimits(xFrequencyLimits[name], false)) {
 				this.vals[name] = val.unique();
 			} else {
 				throw "xFrequency.set : bad values " + val + " for field " + name + ".";
@@ -66,7 +66,6 @@ function xFrequency(s) {
 			this.set('weeks', matches[6]);
 		} catch (e) {
 			var message = 'xFrequency() : error parsing the frequency string ' + s + '. Reason : \n\t' + e.message;
-			window.console && console.log(message);
 			throw message;
 		}
 	};
@@ -125,7 +124,7 @@ function xFrequency(s) {
 		if (n == undefined || !this.vals[n] || v == undefined || !isArray(v))
 			throw 'xFrequency.has : wrong parameters.';
 		for (var i = 0; i < v.length; i++) {
-			var idx = this.vals[n].indexOf(v[i]);
+			var idx = this.vals[n].indexOf(Number(v[i]));
 			if (idx == -1 && !o)
 				return false;
 			else if (idx > -1 && o)

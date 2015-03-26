@@ -142,12 +142,25 @@ Array.unique = function (arr) {
 	return (arr && arr.unique()) || null;
 };
 
-Array.prototype.each = function (cb,data) {
+/*
+ * Loops an array, executing a callback for each element.
+ * invocation : ["an","array"].each(function(e,i,d1,d2){
+ *		... callback body ...
+ * },data1,data2);
+ * if the callback returns false, the loop stops.
+ * in the callback, the this object is the entire array.
+ * 
+ * @param {type} cb callback : function(e, i, ...data)
+ * @param mixed data to pass to callback
+ * @returns {Array.prototype|Boolean}
+ */
+Array.prototype.each = function (cb) {
 	var ret = false;
+	var args=[].slice.call(arguments,1);
 	if (cb !== undefined) {
 		ret = true;
 		for (var i = 0; i < this.length; i++) {
-			if (cb(this[i], i,data) === false) {
+			if (cb.apply(this,[this[i],i].concat(args)) === false) {
 				ret = false;
 				break;
 			}
@@ -155,6 +168,7 @@ Array.prototype.each = function (cb,data) {
 	}
 	return ret ? this : false;
 };
+
 
 
 
