@@ -292,7 +292,7 @@ msgid "Monday"
 msgstr "lundi"
 
 #: ../../js/eventeditor.js:25
-msgid "Satudray"
+msgid "Saturday"
 msgstr "samedi"
 
 #: ../../js/eventeditor.js:25
@@ -314,6 +314,10 @@ msgstr "mercredi"
 #: ../../js/eventeditor.js:27
 msgid "Every|week"
 msgstr "Chaque"
+
+#: ../../js/eventeditor.js:27
+msgid "every|week"
+msgstr "chaque"
 
 #: ../../js/eventeditor.js:27
 msgid "the 1st|day"
@@ -338,6 +342,10 @@ msgstr "le 5ème"
 #: ../../js/eventeditor.js:29
 msgid "Every|day"
 msgstr "Chaque"
+
+#: ../../js/eventeditor.js:29
+msgid "every|day"
+msgstr "chaque"
 
 #: ../../js/eventeditor.js:29
 msgid "the 1st|week"
@@ -374,7 +382,7 @@ msgstr "chaque jour"
 #: ../../js/eventeditor.js:92 ../../js/eventeditor.js:109
 #: ../../js/eventeditor.js:118 ../../js/eventeditor.js:128
 msgid " & "
-msgstr " & "
+msgstr " et "
 
 #: ../../js/eventeditor.js:92
 #, javascript-format
@@ -384,6 +392,15 @@ msgstr "%s"
 #: ../../js/eventeditor.js:92
 msgid "the |day"
 msgstr "le "
+
+msgid "the|day"
+msgstr "le"
+
+msgid "the |week"
+msgstr "la "
+
+msgid "the|week"
+msgstr "la"
 
 #: ../../js/eventeditor.js:101
 msgid " and "
@@ -503,48 +520,47 @@ msgstr "activation d'ehRepeat"
 msgid "Enable ehRepeat Addon"
 msgstr "Activer le module ehRepeat"
 
-#~ msgid "week day"
-#~ msgstr "jour de la semaine"
+msgid " except on |sing"
+msgid_plural " except on |plur"
+msgstr[0] " sauf le "
+msgstr[1] " sauf les "
 
-#~ msgid " of every month"
-#~ msgstr " de chaque mois"
+msgid " of every month except "
+msgstr " chaque mois sauf "
 
-#~ msgid "days"
-#~ msgstr "jours"
+msgid "of |month"
+msgstr "en "
 
-#~ msgid ""
-#~ "The rules and exceptions above would generate events for each of the date "
-#~ "computed here on page save.<br/>These dates were computed on a %d days "
-#~ "period.<br/>You may change this setting on the <a href=\"%s\" target=\"new"
-#~ "\">xEventHandler plugin administration page.</a>"
-#~ msgstr ""
-#~ "Les règles et exceptions ci-dessus généreraient à l'enregistrement un "
-#~ "événement pour chacune des dates calculées ici.<br/>Ces dates ont été "
-#~ "calculées sur une période de %d jours.<br/>Vous pouvez changer ce réglage "
-#~ "sur la <a href=\"%s\" target=\"new\"> page d'administration de "
-#~ "l'eXtension du Gestionnaire d'Événements.</a>"
+msgid " on every %s except "
+msgstr " chaque %s sauf "
 
-#~ msgid "Computation in progress"
-#~ msgstr "Calcul en cours"
+msgid " on every day except "
+msgstr " chaque jour sauf "
 
-#~ msgid ""
-#~ "The rules here will determine how the recurrent events will be generated."
-#~ msgstr ""
-#~ "Les règles présentées ici vont déterminer comment les événements seront "
-#~ "répétés."
+msgid " day except "
+msgstr " jour sauf "
 
-#~ msgid "on every day"
-#~ msgstr "chaque"
+msgid "Total number of repetitive events, or G for a generated event."
+msgstr "Nombre total d'événements répétitifs, ou G pour un événement généré."
 
-#~ msgid "Bad string to parse: %s"
-#~ msgstr "Mauvaise chaîne à analyser: %s"
+msgid "(except %s)"
+msgstr "(sauf %s)"
 
-#~ msgid " - one event has been generated."
-#~ msgid_plural " - %d events have been generated"
-#~ msgstr[0] " - %0d un événement a été généré."
-#~ msgstr[1] " - %d événements ont été générés."
+msgid " of every month (except %s)"
+msgstr " de chaque mois (sauf %s)"
 
-#~ msgid " "
-#~ msgid_plural " "
-#~ msgstr[0] " "
-#~ msgstr[1] " "
+msgid "every week"
+msgstr "chaque semaine"
+
+msgid " on "
+msgstr " le "
+
+msgid "%B, %q"
+msgstr "%q %B"
+
+msgid "%A %B, %e %H:%M"
+msgstr "%A %e %B %Hh%M"
+
+msgid "%A %B, %e"
+msgstr "%A %e %B"
+

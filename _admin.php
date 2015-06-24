@@ -21,8 +21,6 @@ $core->addBehavior('adminEventHandlerSettingsSave', array('adminEhRepeat', 'admi
 if ($core->blog->settings->eventHandler->rpt_active) {
 	$core->addBehavior('adminEventHandlerEventsCustomFilterDisplay', array('adminEhRepeat', 'adminEventHandlerEventsCustomFilterDisplay'));
 	$core->addBehavior('adminEventHandlerEventsPageCustomize', array('adminEhRepeat', 'adminEventHandlerEventsPageCustomize'));
-	$core->addBehavior('coreEventHandlerGetEvents', array('adminEhRepeat', 'coreEventHandlerGetEvents'));
-	$core->addBehavior('coreEventHandlerBeforeGetEvents', array('adminEhRepeat', 'coreEventHandlerBeforeGetEvents'));
 	$core->addBehavior('adminEventHandlerEventsListHeaders', array('adminEhRepeat', 'adminEventHandlerEventsListHeaders'));
 	$core->addBehavior('adminEventHandlerEventsListBody', array('adminEhRepeat', 'adminEventHandlerEventsListBody'));
 	$core->addBehavior('adminEventHandlerMinilistCustomize', array('adminEhRepeat', 'adminEventHandlerMinilistCustomize'));
@@ -37,6 +35,11 @@ if ($core->blog->settings->eventHandler->rpt_active) {
 	$core->addBehavior('adminPostsActionsPage', array('adminEhRepeat', 'adminPostsActionsPage'));
 	$core->addBehavior('adminEventHandlerCustomEventTpl', array('AdminEhRepeat', 'adminEventHandlerCustomEventTpl'));
 	$core->addBehavior('adminEventHandlerCustomEventsTpl', array('adminEhRepeat', 'adminEventHandlerCustomEventsTpl'));
+// These two behaviors are both public and admin, so they are in _prepend.php now.
+//	$core->addBehavior('coreEventHandlerGetEvents', array('adminEhRepeat', 'coreEventHandlerGetEvents'));
+//	$core->addBehavior('coreEventHandlerBeforeGetEvents', array('adminEhRepeat', 'coreEventHandlerBeforeGetEvents'));
+
+	
 }
 
 class adminEhRepeat {
@@ -168,83 +171,6 @@ class adminEhRepeat {
 		#$params['dummy']=1; This would filter the events displayed on the dummy==1 criteria
 	}
 
-	# this behavior is for getEvents records manipulation, generally applying some
-	# extensions.
-
-	public static function coreEventHandlerGetEvents($rs) {
-		$rs->ehRepeat = new ehRepeat($rs->eventHandler);
-		$rs->extend('rsEhRepeatPublic');
-	}
-
-	#this behavior is used to set some specific addons settings before getting events
-	#the parameters are array(&$params) and the eventHandler object instance.
-
-	public static function coreEventHandlerBeforeGetEvents($eh, $args) {
-		foreach ($args as $v => $k) {
-			$$v = &$args[$v];
-		} #Recreates the byref args.
-		$col = (array) $params['columns'];
-		$col[] = 'rpt_master';
-		$col[] = 'rpt_freq';
-		$col[] = 'rpt_exc';
-		$params['columns'] = $col;
-
-		/* to get the master, give master_id in $params['master'] */
-		if (!empty($params['master'])) {
-			$params['post_id'] = $params['master'];
-			$params['sql'] .= " AND EH.rpt_master = '" . $eh->con->escape($params['master']) . "' ";
-			unset($params['master']);
-		}
-
-		/* to get the slaves, give master_id in $params['slaves'] */
-		if (!empty($params['slaves'])) {
-			$params['sql'] .= " AND EH.post_id != EH.rpt_master AND EH.rpt_master = " . $params['slaves'];
-			unset($params['slaves']);
-		}
-
-		/* to get only masters, set params['masters'] to true */
-		if (!empty($params['masters'])) {
-			$params['sql'] .= " AND EH.rpt_master = P.post_id ";
-			unset($params['masters']);
-		}
-
-		/* to get all but slaves, set parms['noslaves'] to true */
-		if (!empty($params['noslaves'])) {
-			$params['sql'] .= " AND ((EH.post_id = EH.rpt_master) OR (EH.rpt_master IS NULL)) ";
-			unset($params['noslaves']);
-		}
-
-		/* to get master and slaves for a master if */
-		if (!empty($params['masterandslaves'])) {
-			$params['sql'] .= " AND EH.rpt_master = " . $params['masterandslaves'];
-		}
-
-		/* to get masters and slaves */
-		if (!empty($params['repetitives'])) {
-			$params['sql'] .= " AND EH.rpt_master IS NOT NULL";
-		}
-
-		if (!empty($params['sortby']) && $params['sortby'] == 'rpt_evnt') {
-			$col = (array) $params['columns'];
-			$col[] = 'S.master';
-			$col[] = 'S.status';
-			$col[] = 'C.nbslaves';
-			$params['columns'] = $col;
-
-			$params['from'].=" INNER JOIN (SELECT post_id as id, rpt_master as master, if(rpt_master IS NULL,'-', if(rpt_master = post_id,'M','S')) as status FROM  dc_eventhandler) S on S.id = P.post_id LEFT JOIN (SELECT CEH.rpt_master as master, count(distinct CP.post_id) AS nbslaves FROM dc_post CP INNER JOIN dc_eventhandler CEH ON  CEH.post_id = CP.post_id WHERE CP.blog_id = 'default' AND  CP.post_type = 'eventhandler' and CEH.rpt_master != CP.post_id AND CEH.rpt_master=4) C on C.master = P.post_id";
-			$order = !empty($_GET['order']) ? $_GET['order'] : 'desc';
-
-			if (!empty($params['repetitives'])) {
-				$params['order'] = 'EH.rpt_master ' . $order . ', S.status ' . $order . ', P.post_dt ' . $order;
-			} else {
-				$params['order'] = 'S.status ' . $order . ', EH.rpt_master ' . $order . ', P.post_dt ' . $order;
-			}
-			unset($params['repetitives']);
-			unset($params['masterandslaves']);
-			unset($params['sortby']);
-		}
-	}
-
 	#this behavior is used to perform some specific addon's actions on the database cursor
 	#the parameters are $eh, the eventHandler object instance, $post_id, $cur_post and $cur_event
 
@@ -290,7 +216,7 @@ class adminEhRepeat {
 		$num = 3; //Insert a new column header @3rd position.
 		if ($ismini)
 			$num++;#Minilist adds a 'period' column so we increase $num
-		$columns = array_merge(array_slice($columns, 0, $num), array('<th>' . __('Rep.') . '</th>'), array_slice($columns, $num));
+		$columns = array_merge(array_slice($columns, 0, $num), array('<th><span title="'.__('Total number of repetitive events, or G for a generated event.').'">' . __('Rep.') . '</span></th>'), array_slice($columns, $num));
 	}
 
 	# this behavior permits events list lines manipulation.
@@ -304,7 +230,7 @@ class adminEhRepeat {
 		$num = 3; //Insert a new column header @3rd position.
 		if ($ismini)
 			$num++;#Minilist adds a 'period' column so we increase $num
-		$rep = $rs->countSlaves();
+		$rep = $rs->countEvents();
 		if ($rep == -2) {
 			$rep = __('G');
 		} else if ($rep == -1) {
@@ -330,14 +256,75 @@ class adminEhRepeat {
 				__('Make unique') => 'mkunique'
 			)), array('adminEhRepeat', 'doChangeRepeat')
 		);
+		$combo=$ap->getCombo();
+		$ap->addAction(
+			$combo[__('Status')],
+			array('adminEhRepeat', 'doDefaultActions')
+		);
+		$ap->addAction(
+			$combo[__('Mark')],
+			array('adminEhRepeat', 'doDefaultActions')
+		);
+		$ap->addAction(
+			$combo[__('Change')],
+			array('adminEhRepeat','doDefaultActions')
+		);
+		$ap->addAction(
+			$combo[__('Change')],
+			array('adminEhRepeat','doDefaultActions')
+		);
+		if ($core->auth->check('admin',$core->blog->id))
+		{
+			$ap->addAction(
+				$combo[__('Change')],
+				array('adminEhRepeat','doDefaultActions')
+			);
+		}
+		if ($core->auth->check('delete,contentadmin',$core->blog->id)) {
+			$ap->addAction(
+				array(__('Delete') => array(
+					__('Delete') => 'delete')),
+				array('adminEhRepeat','doDefaultActions')
+			);
+		}
+
 	}
 
+	public static function doDefaultActions($core, $ap, $post) {
+		$mAp=new myActionsPage($ap);
+		if($mAp->getP()!='eventHandler' || $ap->getAction()=='delete'){
+			dcDefaultPostActions::adminPostsActionsPage($core,$ap); //reload default values
+			$ap->process();
+			return;
+		}
+		global $eventHandler;		
+		if (!isset($eventHandler)) {
+			$eventHandler = new eventHandler($core);
+		}
+		$ehRepeat = new ehRepeat($eventHandler);
+		$posts_ids = $ap->getIDs();
+		if (empty($posts_ids)) {
+			throw new Exception(__('No entry selected'));
+		}
+		$extra_posts_ids=array();
+		foreach($posts_ids as $post_id){
+			$rs=$ehRepeat->getMasterAndSlaves($post_id);
+			while($rs->fetch()){
+				$extra_posts_ids[]=(integer)$rs->post_id;
+			}
+		}
+		$mAp->addEntries($extra_posts_ids);
+		dcDefaultPostActions::adminPostsActionsPage($core,$mAp); //reload default values
+		$mAp->setEnableRedirSelection(false);
+		$mAp->process();
+	}
+		
 	#This callback is called when the action combo is used on post action page
 
 	public static function doChangeRepeat($core, dcPostsActionsPage $ap, $post) {
 		global $eventHandler;
 		try {
-			if (!$eventHandler) {
+			if (!isset($eventHandler)) {
 				$eventHandler = new eventHandler($core);
 			}
 			$ehRepeat = new ehRepeat($eventHandler);
@@ -470,17 +457,17 @@ class adminEhRepeat {
 			$eventHandler->updEvent($post_id, $cur_post, $cur_event);
 			if ($rpt_master) {
 				$oldmasterrenewed = false;
-					$count = $ehRepeat->generateSlaves($rpt_master, $masterdtchanged);
-					if ($masterdtchanged) {
-						dcPage::addWarningNotice(sprintf(__("Event %d was outdated, it has been updated."), $rpt_master));
-					}
-					if ($count == -1) {
-						dcPage::addWarningNotice(sprintf(
-										__("Could not generate repetitive events for event %d"), $rpt_master));
-					} else if($count>0) {
-						dcPage::addSuccessNotice(sprintf(
-										__("%d repetitive event generated for event %d", '%d repetitive events generated for event %d', $count), $count, $rpt_master));
-					}
+				$count = $ehRepeat->generateSlaves($rpt_master, $masterdtchanged);
+				if ($masterdtchanged) {
+					dcPage::addWarningNotice(sprintf(__("Event %d was outdated, it has been updated."), $rpt_master));
+				}
+				if ($count == -1) {
+					dcPage::addWarningNotice(sprintf(
+									__("Could not generate repetitive events for event %d"), $rpt_master));
+				} else if ($count > 0) {
+					dcPage::addSuccessNotice(sprintf(
+									__("%d repetitive event generated for event %d", '%d repetitive events generated for event %d', $count), $count, $rpt_master));
+				}
 			}
 		} catch (Exception $e) {
 			/* we have to reverse the creation as something went wrong */
@@ -577,4 +564,28 @@ class adminEhRepeat {
 				dcPage::jsGettext(dirname(__FILE__), 'index.php?pf=ehRepeat', 'js', 'eventeditor.js', 'dc_messages');
 	}
 
+}
+
+//Extended class to make protected fields public and be able to modify the actionPage.
+class myActionsPage extends dcPostsActionsPage{
+	public $uri,$redir_args;
+	public function __construct($ap){
+		parent::__construct($ap->core, $ap->uri, $ap->redir_args);
+	}
+	
+	public function addEntries($ids){
+		if($ids==null)
+			return;
+		if(!is_array($ids)){
+			$ids=array($ids);
+		}
+		$allentries=array_unique(array_merge($this->from['entries'],$ids));
+		$from=$this->from;
+		$from['entries']=$allentries;
+	}
+	
+	public function getP(){
+		return $this->from['p'];
+	}
+	
 }

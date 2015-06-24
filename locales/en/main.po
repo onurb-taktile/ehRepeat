@@ -1,0 +1,102 @@
+# xEventHandler
+# Copyright (C) 2015 Onurb Teva
+# This file is distributed under the same license as the PACKAGE package.
+# onurb teva <dev@taktile.fr>, 2015.
+# bruno <bruno@taktile.fr>, 2015.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 2015-03-08\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-03-26 21:51+0100\n"
+"PO-Revision-Date: 2015-03-26 21:51+0100\n"
+"Last-Translator: bruno <bruno@taktile.fr>\n"
+"Language-Team: english <>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Gtranslator 2.91.6\n"
+
+#: ../../js/eventeditor.js:92
+msgid "the |day"
+msgstr "the "
+
+msgid "the|day"
+msgstr "the"
+
+msgid "the|week"
+msgstr "the"
+
+#: ../../js/event.js:35
+msgid ":|hour separator"
+msgstr ":"
+
+#: ../../js/event.js:48
+msgid "hr|hour symbol"
+msgstr "hr"
+
+#: ../../js/eventeditor.js:27
+msgid "Every|week"
+msgstr "Every"
+
+#: ../../js/eventeditor.js:27
+msgid "every|week"
+msgstr "every"
+
+#: ../../js/eventeditor.js:27
+msgid "the 1st|day"
+msgstr "the 1st"
+
+#: ../../js/eventeditor.js:27
+msgid "the 2nd|day"
+msgstr "the 2nd"
+
+#: ../../js/eventeditor.js:28
+msgid "the 3rd|day"
+msgstr "the 3rd"
+
+#: ../../js/eventeditor.js:28
+msgid "the 4th|day"
+msgstr "the 4th"
+
+#: ../../js/eventeditor.js:28
+msgid "the 5th|day"
+msgstr "the 5th"
+
+#: ../../js/eventeditor.js:29
+msgid "Every|day"
+msgstr "Every"
+
+#: ../../js/eventeditor.js:29
+msgid "every|day"
+msgstr "every"
+
+#: ../../js/eventeditor.js:29
+msgid "the 1st|week"
+msgstr "the 1st"
+
+#: ../../js/eventeditor.js:29
+msgid "the 2nd|week"
+msgstr "the 2nd"
+
+#: ../../js/eventeditor.js:30
+msgid "the 3rd|week"
+msgstr "the 3rd"
+
+#: ../../js/eventeditor.js:30
+msgid "the 4th|week"
+msgstr "the 4th"
+
+#: ../../js/eventeditor.js:30
+msgid "the 5th|week"
+msgstr "the 5th"
+
+msgid "of |month"
+msgstr "of "
+
+msgid " except on |sing"
+msgid_plural " except on |plur"
+msgstr[0] " except on "
+msgstr[1] " except on "

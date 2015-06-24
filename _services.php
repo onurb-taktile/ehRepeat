@@ -23,7 +23,7 @@ class ehRepeatRestMethods
 		$rsp = new xmlTag();
 		if ($freq == null)
 			throw new Exception("Frequency string missing",1);
-		$xfreq = new xFrequency($freq);
+		$xfreq = new xFrequency($freq,$core->blog->settings->eventHandler->rpt_sunday_first);
 		$rsp->value(json_encode($xfreq->toXml(),JSON_PRETTY_PRINT));
 		return $rsp;
 	}
@@ -40,8 +40,8 @@ class ehRepeatRestMethods
 				
 		$t_startdt = strtotime($startdt);
 		$t_duration = $core->blog->settings->eventHandler->rpt_duration;
-		$t_enddt = $enddt? strtotime($enddt):strtotime($t_startdt+($t_duration*24*3600));
-		$xfreq=new xFrequency($freq);
+		$t_enddt = $enddt? strtotime($enddt):$t_startdt+($t_duration*24*3600);
+		$xfreq=new xFrequency($freq,$core->blog->settings->eventHandler->rpt_sunday_first);
 		$slave_dates=  $xfreq->computeDates($t_startdt, $t_duration, $exc);
 		
 		$rsp->insertNode($xfreq->toXml());

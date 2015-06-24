@@ -17,7 +17,7 @@ $this->registerModule(
 	/* Name */				"Event handler recurrent events addon",
 	/* Description*/		"Extends EventHandler for repetitive events management",
 	/* Author */			"Onurb Teva <dev@taktile.fr>",
-	/* Version */			'2015.04.05',
+	/* Version */			'2015.06.24',
 	array(
 		'permissions' =>	'usage,contentadmin',
 		'priority' =>		1001,
