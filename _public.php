@@ -48,9 +48,9 @@ class publicEHRepeat
 				$res.="\$params['repetitives']=true;\n";
 			}
 			if(isset($attr['sortby']) && $attr['sortby']=='rpt_evnt'){
-				$res.="\$params['sortby']=rpt_evnt;\n";
+				$res.="\$params['sortby']='rpt_evnt';\n";
 				if(isset($attr['order'])){
-					$res.="\$params['order']=".$attr['order'].";\n";
+					$res.="\$params['order']='".$attr['order']."';\n";
 				}
 			}
 		}

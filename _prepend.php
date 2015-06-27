@@ -114,7 +114,8 @@ ehRepeat::doTheRevolution();
 			$col[] = 'C.nbslaves';
 			$params['columns'] = $col;
 
-			$params['from'].=" INNER JOIN (SELECT post_id as id, rpt_master as master, if(rpt_master IS NULL,'-', if(rpt_master = post_id,'M','S')) as status FROM  ".$core->prefix."eventhandler) S on S.id = P.post_id LEFT JOIN (SELECT CEH.rpt_master as master, count(distinct CP.post_id) AS nbslaves FROM ".$core->prefix."post CP INNER JOIN ".$core->prefix."eventhandler CEH ON  CEH.post_id = CP.post_id WHERE CP.blog_id = 'default' AND  CP.post_type = 'eventhandler' and CEH.rpt_master != CP.post_id AND CEH.rpt_master=4) C on C.master = P.post_id";
+			$params['from'].=" INNER JOIN (SELECT post_id as id, rpt_master as master, if(rpt_master IS NULL,'-', if(rpt_master = post_id,'M','S')) as status FROM  ".$core->prefix."eventhandler) S on S.id = P.post_id LEFT JOIN (SELECT CH.rpt_master as master, count(distinct CP.post_id) AS nbslaves FROM ".$core->prefix."post CP INNER JOIN ".$core->prefix."eventhandler CH ON  CH.post_id = CP.post_id WHERE CP.blog_id = '".$core->con->escape($core->blog->id)."' AND CP.post_type = 'eventhandler' and CH.rpt_master != CP.post_id AND CH.rpt_master IS NOT NULL group by master) C on C.master = P.post_id ";
+		
 			$order = !empty($params['order']) ? $params['order'] : (!empty($_GET['order']) ? $_GET['order'] : 'desc');
 
 			if (!empty($params['repetitives'])) {
@@ -129,7 +130,7 @@ ehRepeat::doTheRevolution();
 		
 		/* to get the first event only : a non repetitive event, or the first master or slave for a given masterid */
 		if(!empty($params['firstonly'])&&$params['firstonly']){
-			$params['from']=str_replace( "EH.post_id","IFNULL(EH.rpt_master,EH.post_id)",$params['from']);
+			$params['from']=str_replace( " EH.post_id"," IFNULL(EH.rpt_master,EH.post_id)",$params['from']);
 			$params['sql'].=' GROUP BY P.post_id ';
 			unset($params['firstonly']);			
 		}
@@ -138,7 +139,7 @@ ehRepeat::doTheRevolution();
 		if (!empty($params['replace_slaves']) && $params['replace_slaves']) {
 			//We modify the join condition, inserting a IFNULL() construct :
 			// if EH.rpt_master is null (a non repetitive event), EH.post_id is used instead.
-			$params['from']=str_replace( "EH.post_id","IFNULL(EH.rpt_master,EH.post_id)",$params['from']);
+			$params['from']=str_replace( "EH.post_id"," IFNULL(EH.rpt_master,EH.post_id)",$params['from']);
 			$params['sql'].=' GROUP BY P.post_id ';
 			unset($params['replace_slaves']);
 		}
